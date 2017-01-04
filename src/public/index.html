@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title></title>
+
+    <!--样式处理[公共]-->
+    <link href="common/kendoui/v2016.3.1028/styles/kendo.common.min.css" rel="stylesheet">
+    <link href="common/kendoui/v2016.3.1028/styles/kendo.common-material.min.css" rel="stylesheet">
+    <link href="common/kendoui/v2016.3.1028/styles/kendo.material.min.css" rel="stylesheet">
+    <link href="common/kendoui/v2016.3.1028/styles/kendo.rtl.min.css" rel="stylesheet">
+
+
+
+
+    <!--App样式处理-->
+    <link rel="stylesheet"  href="styles/ui.css" />
+
+</head>
+<body>
+
+<div class="k-content-frame">
+    <div id="toolbar" class="controlBar"></div>
+    <div class="middle">
+        <div id="speed-canvas">
+        </div>
+        <div id="servers-canvas">
+        </div>
+    </div>
+    <div class="footer">
+        <div id="progress"></div>
+        <button id="btnStart" class="k-primary">Start</button>
+    </div>
+</div>
+<div id="history-window"></div>
+<div id="fullHistory-window"></div>
+<div id="ipinfo-window"></div>
+<div id="settings-window"></div>
+<div id="feedBack-window"></div>
+<div id="autoTestConfig-window"></div>
+
+<script type="text/x-kendo-template" id="template-window-settings">
+    <div class="settings-panel">
+        <div class="app-section">
+            <ul class="app-fieldList">
+                <li>
+                    <label for="settings-app-ui-ping">Ping Scale(max):</label>
+                    <input id="settings-app-ui-ping" />
+                </li>
+                <li>
+                    <label for="settings-app-ui-ping">Download Scale(max):</label>
+                    <input id="settings-app-ui-download" />
+                </li>
+                <li>
+                    <label for="settings-app-ui-ping">Upload Scale(max):</label>
+                    <input id="settings-app-ui-upload" />
+                </li>
+            </ul>
+        </div>
+
+        <div class="k-footer">
+            <button class="k-button">Default</button>
+            <button class="k-button k-primary">Update</button>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-kendo-template" id="template-window-auto-test">
+    <div class="settings-panel">
+        <div class="app-section">
+            <textarea class="runningInfo" readonly="readonly">Auto repeat test ...</textarea>
+            <ul class="app-fieldList">
+                <li>
+                    <label for="auto-app-ui-pre-minutes">Repeat/minutes:</label>
+                    <input id="auto-app-ui-pre-minutes" />
+                </li>
+                <li>
+                    <label for="auto-app-ui-start-time">Start Time:</label>
+                    <input id="auto-app-ui-start-time" />
+                </li>
+                <li>
+                    <label for="auto-app-ui-end-time">End Time:</label>
+                    <input id="auto-app-ui-end-time" />
+                </li>
+            </ul>
+        </div>
+
+        <div class="k-footer">
+            <button class="k-button k-primary">Auto Run</button>
+            <button class="k-button">Close</button>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-kendo-template" id="template-window-history">
+    <div id="history-canvas" style="height: 400px; width: 900px"></div>
+</script>
+
+<script type="text/x-kendo-template" id="template-window-fullHistory">
+    <div id="fullHistory-canvas" style="height: 400px; width: 900px"></div>
+</script>
+
+<script type="text/x-kendo-template" id="template-window-ipinfo">
+    <div id="ip-grid"></div>
+</script>
+
+<script type="text/x-kendo-template" id="template-window-feedback">
+    <div class="k-content">
+        <div class="app-section">
+            <form id="feedbackForm">
+                <ul class="fieldlist">
+                    <li>
+                        <label for="feedback-ui-name" class="required">Your Name</label>
+                        <input id="feedback-ui-name" name="Your Name" placeholder="Your Name" type="text" class="k-textbox" required validationMessage="Enter {0}" />
+                    </li>
+                    <li>
+                        <label for="feedback-ui-email" class="required">Your Email</label>
+                        <input id="feedback-ui-email" name="Your Email" placeholder="Your Email" type="email" class="k-textbox"
+                               required validationMessage="Enter {0}"/>
+                    </li>
+                    <li>
+                        <label for="feedback-ui-message" class="required">Your Message</label>
+                        <textarea id="feedback-ui-message" name="Your Feedback Message" rows="4"
+                                  placeholder="Feedback Message"
+                                  class="k-textbox" ></textarea>
+                    </li>
+                </ul>
+            </form>
+        </div>
+
+        <div class="k-footer">
+            <button class="k-button k-primary">Send</button>
+        </div>
+    </div>
+</script>
+
+
+<script type="text/x-kendo-template" id="viewTemplate-ipinfo-item">
+    <tr>
+        <td>
+            <div class="item-ipinfo ${groupClass}">
+                ${key} ${value}
+                # if (enableLocation) { #
+                <img class="item-image" src="images/location_64.png" data-rtyll="${value}" onclick="UI.c$.actions.onLocationClick(this)"/>
+                # } #
+            </div>
+        </td>
+    </tr>
+</script>
+
+
+<!--基础库加载-->
+<script src="common/underscore/1.8.3/underscore-min.js"></script>
+<script src="common/jquery/jquery-3.1.1.min.js"
+        onload="(function(){ try{window.$ = window.jQuery = module.exports;}catch(e){}})();"></script>
+<script src="common/jquery/jquery-migrate-3.0.0.min.js"></script>
+<script src="common/jquery/jquery-json/2.6.0/jquery.json.min.js"></script>
+<script src="common/jquery/jszip.min.js"></script>
+
+<!--UI第三方库-->
+<script src="common/kendoui/v2016.3.1028/js/kendo.all.min.js"></script>
+<script src="common/echarts/3.2.3/echarts.min.js"></script>
+
+<!--核心启动加载-->
+<script src="js/util.js"></script>
+<script src="js/bs.js"></script>
+
+<!--插件部分加载-->
+
+<!--扩展加载-->
+<script src="js/extends/tools.python.js"></script>
+<script src="js/extends/business.native.js"></script>
+<script src="js/extends/l10n.js"></script>
+
+<!--App 核心-->
+<script src="js/core/app.observer.js"></script>
+<script src="js/core/app.config.js"></script>
+<script src="js/core/app.util.js"></script>
+
+<!--App 插件-->
+
+<!--App UI组件-->
+<script src="js/components/app.settings_config.js"></script>
+<script src="js/components/app.feedback.js"></script>
+<script src="js/components/app.test_history.js"></script>
+<script src="js/components/app.ipinfo.js"></script>
+<script src="js/components/app.task_watcher.js"></script>
+<script src="js/components/app.auto_test.js"></script>
+<script src="js/components/app.toolbar.js"></script>
+<script src="js/components/app.main.js"></script>
+
+<!--App 启动-->
+<script src="js/app.js"></script>
+
+</body>
+</html>
